@@ -16,7 +16,7 @@ import { Payload } from 'src/auth/auth.interface';
 import { ReqUser } from 'src/auth/decorators/req-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { GetAllRequestDto, GetAllResponseDto } from './dto/get-all.dto';
+import { GetAllRequestQuery, GetAllResponseDto } from './dto/get-all.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskEntity } from './entities/task.entity';
 import { QueryFailedErrorFilter } from './filters/query-failed-error.filter';
@@ -41,8 +41,8 @@ export class TaskController {
 
   @UseGuards(JwtAuthGuard)
   @Get('getAll')
-  async getAll(@ReqUser() user: Payload, @Query() dto: GetAllRequestDto): Promise<GetAllResponseDto> {
-    return this.taskService.getAllByAssignee(user.sub, dto);
+  async getAll(@ReqUser() user: Payload, @Query() query: GetAllRequestQuery): Promise<GetAllResponseDto> {
+    return this.taskService.getAllByAssignee(user.sub, query);
   }
 
   @UseGuards(JwtAuthGuard)

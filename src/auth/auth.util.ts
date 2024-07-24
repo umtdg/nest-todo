@@ -1,9 +1,9 @@
 import { Request } from 'express';
-import { jwtConstants } from 'src/constants';
+import { JWT_COOKIE_KEY } from 'src/constants';
 import { JwtSign } from './auth.interface';
 
 export function jwtFromCokkie(request: Request) {
-  const jwtSignCookie = request.cookies?.[jwtConstants.cookieKey];
+  const jwtSignCookie = request.cookies?.[JWT_COOKIE_KEY];
   if (!jwtSignCookie) return null;
 
   const jwtSign = JSON.parse(jwtSignCookie) as JwtSign;
@@ -13,7 +13,7 @@ export function jwtFromCokkie(request: Request) {
 }
 
 export function jwtRefreshFromCookie(request: Request) {
-  const jwtSignCookie = request.cookies?.[jwtConstants.cookieKey];
+  const jwtSignCookie = request.cookies?.[JWT_COOKIE_KEY];
   if (!jwtSignCookie) return null;
 
   const jwtSign = JSON.parse(jwtSignCookie) as JwtSign;

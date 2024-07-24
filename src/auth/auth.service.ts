@@ -1,7 +1,7 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { compareSync } from 'bcrypt';
-import { jwtConstants } from 'src/constants';
 import { TokenService } from 'src/token/token.service';
 import { UserResponseDto, mapUser } from 'src/user/dto/user.dto';
 import { UserEntity } from 'src/user/entities/user.entity';
@@ -13,6 +13,7 @@ import { SignUpDto } from './dto/signup.dto';
 @Injectable()
 export class AuthService {
   constructor(
+    private config: ConfigService,
     private jwtService: JwtService,
     private tokenService: TokenService,
     private userService: UserService,
@@ -70,14 +71,14 @@ export class AuthService {
 
   private jwtSign(payload: Omit<Payload, 'exp' | 'iat'>): JwtSign {
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: jwtConstants.expiresIn,
-      secret: jwtConstants.secret,
+      expiresIn: this.config.get<string>('auth.jwt.expiresIn'),
+      secret: this.config.get<string>('auth.jwt.secret'),
     });
     const accessTokenExp = this.jwtService.decode<Payload>(accessToken).exp;
 
     const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: jwtConstants.refreshExpiresIn,
-      secret: jwtConstants.refreshSecret,
+      expiresIn: this.config.get<string>('auth.jwtRefresh.expiresIn'),
+      secret: this.config.get<string>('auth.jwtRefresh.secret'),
     });
     const refreshTokenExp = this.jwtService.decode<Payload>(refreshToken).exp;
 

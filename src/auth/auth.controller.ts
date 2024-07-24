@@ -1,7 +1,8 @@
 import { Body, Controller, Logger, Post, Res, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { jwtConstants } from 'src/constants';
+import { JWT_COOKIE_KEY } from 'src/constants';
 import { UserResponseDto } from 'src/user/dto/user.dto';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { JwtSign, Payload } from './auth.interface';
@@ -18,10 +19,13 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private config: ConfigService,
+  ) {}
 
   private setJwtCookies(response: Response, jwtSign: JwtSign): void {
-    response.cookie(jwtConstants.cookieKey, JSON.stringify(jwtSign), { httpOnly: true });
+    response.cookie(JWT_COOKIE_KEY, JSON.stringify(jwtSign), { httpOnly: true });
   }
 
   @UseGuards(LocalAuthGuard)
@@ -42,7 +46,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@ReqUser() user: Payload, @Cookies(jwtConstants.cookieKey) jwtSignJson: string): Promise<void> {
+  async logout(@ReqUser() user: Payload, @Cookies(JWT_COOKIE_KEY) jwtSignJson: string): Promise<void> {
     Logger.log(`Received logout request for ${JSON.stringify(user.email)}`);
     const jwtSign: JwtSign = JSON.parse(jwtSignJson);
     return this.authService.logout(jwtSign);
@@ -60,7 +64,7 @@ export class AuthController {
   async refresh(
     @ReqUser() user: Payload,
     @Res({ passthrough: true }) response: Response,
-    @Cookies(jwtConstants.cookieKey) jwtSignJson: string,
+    @Cookies(JWT_COOKIE_KEY) jwtSignJson: string,
   ): Promise<void> {
     Logger.log(`Received refresh request for ${JSON.stringify(user)}`);
 
