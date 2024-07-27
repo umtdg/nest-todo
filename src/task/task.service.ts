@@ -1,8 +1,9 @@
 import { BadRequestException, ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { SortOptions } from './decorators/sort-params.decorator';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { GetAllRequestQuery, GetAllResponseDto } from './dto/get-all.dto';
+import { GetAllResponseDto } from './dto/get-all.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskEntity } from './entities/task.entity';
 
@@ -15,11 +16,11 @@ export class TaskService {
     return this.taskRepository.save(dto);
   }
 
-  async getAllByAssignee(assignee: string, query: GetAllRequestQuery): Promise<GetAllResponseDto> {
+  async getAllByAssignee(assignee: string, sortOptions: SortOptions): Promise<GetAllResponseDto> {
     const tasks = await this.taskRepository.find({
       where: { assigneeId: assignee },
       order: {
-        [query.sortBy]: query.sortDirection,
+        [sortOptions.by]: sortOptions.order,
       },
     });
 

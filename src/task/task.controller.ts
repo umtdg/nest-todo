@@ -1,22 +1,11 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Logger,
-  Param,
-  Patch,
-  Post,
-  Query,
-  UseFilters,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Logger, Param, Patch, Post, UseFilters, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Payload } from 'src/auth/auth.interface';
 import { ReqUser } from 'src/auth/decorators/req-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { SortOptions, SortParams } from './decorators/sort-params.decorator';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { GetAllRequestQuery, GetAllResponseDto } from './dto/get-all.dto';
+import { GetAllResponseDto } from './dto/get-all.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskEntity } from './entities/task.entity';
 import { QueryFailedErrorFilter } from './filters/query-failed-error.filter';
@@ -41,8 +30,11 @@ export class TaskController {
 
   @UseGuards(JwtAuthGuard)
   @Get('getAll')
-  async getAll(@ReqUser() user: Payload, @Query() query: GetAllRequestQuery): Promise<GetAllResponseDto> {
-    return this.taskService.getAllByAssignee(user.sub, query);
+  async getAll(
+    @ReqUser() user: Payload,
+    @SortParams(['id', 'title', 'createdAt', 'status']) sortOptions: SortOptions,
+  ): Promise<GetAllResponseDto> {
+    return this.taskService.getAllByAssignee(user.sub, sortOptions);
   }
 
   @UseGuards(JwtAuthGuard)
