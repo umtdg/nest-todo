@@ -9,6 +9,10 @@ export interface TodoAppJwtConfig {
   expiresIn: string;
 }
 
+export interface TodoAppPaginationConfig {
+  defaultLimit: number;
+}
+
 export interface TodoAppConfig {
   system: TodoAppSystemConfig;
   db: TypeOrmModuleOptions;
@@ -16,6 +20,7 @@ export interface TodoAppConfig {
     jwt: TodoAppJwtConfig;
     jwtRefresh: TodoAppJwtConfig;
   };
+  pagination: TodoAppPaginationConfig;
 }
 
 export default (): TodoAppConfig => ({
@@ -41,5 +46,8 @@ export default (): TodoAppConfig => ({
       secret: process.env.JWT_REFRESH_SECRET || 'JWT REFRESH SECRET TO BE REPLACED',
       expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
     },
+  },
+  pagination: {
+    defaultLimit: 20,
   },
 });

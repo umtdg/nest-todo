@@ -1,7 +1,9 @@
 import { BadRequestException, ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { SortOptions } from './decorators/sort-params.decorator';
+import { FindManyOptions, Repository } from 'typeorm';
+import { FilterOptions, filterOptionToTypeOrm } from './decorators/filter-params.decorator';
+import { PaginationOptions } from './decorators/pagination-params.decorator';
+import { SortOptions, sortOptionsToTypeOrm } from './decorators/sort-params.decorator';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetAllResponseDto } from './dto/get-all.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -16,13 +18,32 @@ export class TaskService {
     return this.taskRepository.save(dto);
   }
 
-  async getAllByAssignee(assignee: string, sortOptions: SortOptions): Promise<GetAllResponseDto> {
-    const tasks = await this.taskRepository.find({
+  async getAllByAssignee(
+    assignee: string,
+    sort: SortOptions,
+    filter: FilterOptions[],
+    pagination: PaginationOptions,
+  ): Promise<GetAllResponseDto> {
+    let findOpts: FindManyOptions = {
       where: { assigneeId: assignee },
-      order: {
-        [sortOptions.by]: sortOptions.order,
-      },
-    });
+      order: {},
+    };
+
+    for (const filterOpt of filter) {
+      findOpts.where = {
+        ...findOpts.where,
+        ...filterOptionToTypeOrm(filterOpt),
+      };
+    }
+
+    if (sort) findOpts.order = sortOptionsToTypeOrm(sort);
+
+    if (pagination) {
+      findOpts.skip = pagination.skip;
+      findOpts.take = pagination.limit;
+    }
+
+    const tasks = await this.taskRepository.find(findOpts);
 
     return { tasks };
   }

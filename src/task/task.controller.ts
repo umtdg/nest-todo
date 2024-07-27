@@ -3,6 +3,8 @@ import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Payload } from 'src/auth/auth.interface';
 import { ReqUser } from 'src/auth/decorators/req-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { FilterOptions, FilterParams } from './decorators/filter-params.decorator';
+import { PaginationOptions, PaginationParams } from './decorators/pagination-params.decorator';
 import { SortOptions, SortParams } from './decorators/sort-params.decorator';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetAllResponseDto } from './dto/get-all.dto';
@@ -33,8 +35,10 @@ export class TaskController {
   async getAll(
     @ReqUser() user: Payload,
     @SortParams(['id', 'title', 'createdAt', 'status']) sortOptions: SortOptions,
+    @FilterParams(['createdAt', 'updatedAt', 'status']) filterOptions: FilterOptions[],
+    @PaginationParams() paginationOptions: PaginationOptions,
   ): Promise<GetAllResponseDto> {
-    return this.taskService.getAllByAssignee(user.sub, sortOptions);
+    return this.taskService.getAllByAssignee(user.sub, sortOptions, filterOptions, paginationOptions);
   }
 
   @UseGuards(JwtAuthGuard)
